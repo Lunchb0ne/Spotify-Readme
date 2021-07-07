@@ -25,35 +25,6 @@
 | `theme`     | `light`    | `light`, `dark` |
 | `rainbow`   | `false`    | `false`, `true` |
 
-#### Default
-```
-/api
-```
-![Preview](https://itstommi.vercel.app/api)
-
-#### Spinning CD Effect
-```
-/api?spin=true
-```
-![Preview](https://itstommi.vercel.app/api?spin=true)
-
-#### Include Scan Code
-```
-/api?scan=true
-```
-![Preview](https://itstommi.vercel.app/api?scan=true)
-
-#### Rainbow Equalizer
-```
-/api?rainbow=true
-```
-![Preview](https://itstommi.vercel.app/api?rainbow=true)
-
-#### Dark Theme
-```
-/api?theme=dark
-```
-![Preview](https://itstommi.vercel.app/api?theme=dark)
 
 ## Notes
 
