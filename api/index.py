@@ -1,43 +1,47 @@
-import requests
 from base64 import b64encode
-from dotenv import find_dotenv, load_dotenv
-from flask import Flask, Response, render_template, request
 from os import getenv
 from random import randint
+import requests
+
+from dotenv import find_dotenv, load_dotenv
+from flask import Flask, Response, render_template, request
 
 # Load environment variables
 load_dotenv(find_dotenv())
 
 # Define base-64 encoded images
-with open('api/base64/placeholder_scan_code.txt') as f:
+with open('api/base64/placeholder_scan_code.txt', encoding='UTF-8') as f:
     B64_PLACEHOLDER_SCAN_CODE = f.read()
-with open('api/base64/placeholder_image.txt') as f:
+
+with open('api/base64/placeholder_image.txt', encoding='UTF-8') as f:
     B64_PLACEHOLDER_IMAGE = f.read()
-with open('api/base64/spotify_logo.txt') as f:
+
+with open('api/base64/spotify_logo.txt', encoding='UTF-8') as f:
     B64_SPOTIFY_LOGO = f.read()
 
 
 def get_token():
     '''Get a new access token'''
-    r = requests.post('https://accounts.spotify.com/api/token', data={
+    resp = requests.post('https://accounts.spotify.com/api/token', data={
         'grant_type': 'refresh_token',
         'refresh_token': getenv('REFRESH_TOKEN'),
         'client_id': getenv('CLIENT_ID'),
-        'client_secret': getenv('CLIENT_SECRET'),
-    })
+        'client_secret': getenv('CLIENT_SECRET')
+    }, timeout=1000)
     try:
-        return r.json()['access_token']
-    except BaseException:
-        raise Exception(r.json())
+        return resp.json()['access_token']
+    except BaseException as exc:
+        raise EnvironmentError(resp.json()) from exc
 
 
 def spotify_request(endpoint):
     '''Make a request to the specified endpoint'''
-    r = requests.get(
+    resp = requests.get(
         f'https://api.spotify.com/v1/{endpoint}',
-        headers={'Authorization': f'Bearer {get_token()}'}
+        headers={'Authorization': f'Bearer {get_token()}'},
+        timeout=1000
     )
-    return {} if r.status_code == 204 else r.json()
+    return {} if resp.status_code == 204 else resp.json()
 
 
 def generate_bars(bar_count, rainbow):
@@ -67,7 +71,7 @@ def generate_bars(bar_count, rainbow):
 
 def load_image_base64(url):
     '''Get the base-64 encoded image from url'''
-    resposne = requests.get(url)
+    resposne = requests.get(url, timeout=1000)
     return b64encode(resposne.content).decode('ascii')
 
 
@@ -80,8 +84,7 @@ def get_scan_code(spotify_uri):
 
 def make_svg(spin, scan, theme, rainbow):
     '''Render the HTML template with variables'''
-    data = spotify_request('me/player/currently-playing')
-    if data:
+    if data := spotify_request('me/player/currently-playing'):
         item = data['item']
     else:
         item = spotify_request(
@@ -91,14 +94,12 @@ def make_svg(spin, scan, theme, rainbow):
         image = B64_PLACEHOLDER_IMAGE
     else:
         image = load_image_base64(item['album']['images'][1]['url'])
-
     if scan and scan != 'false' and scan != '0':
         bar_count = 10
         scan_code = get_scan_code(item['uri'])
     else:
         bar_count = 12
         scan_code = None
-
     return render_template('index.html', **{
         'bars': generate_bars(bar_count, rainbow),
         'artist': item['artists'][0]['name'].replace('&', '&amp;'),
@@ -107,7 +108,7 @@ def make_svg(spin, scan, theme, rainbow):
         'scan_code': scan_code if scan_code != '' else B64_PLACEHOLDER_SCAN_CODE,
         'theme': theme,
         'spin': spin,
-        'logo': B64_SPOTIFY_LOGO,
+        'logo': B64_SPOTIFY_LOGO
     })
 
 
@@ -117,6 +118,7 @@ app = Flask(__name__)
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
 def catch_all(path):
+    '''Catch all requests and render the SVG'''
     resp = Response(
         make_svg(
             request.args.get('spin'),
