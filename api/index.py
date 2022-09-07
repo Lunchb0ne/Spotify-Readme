@@ -117,7 +117,7 @@ app = Flask(__name__)
 
 @app.route("/", defaults={"path": ""})
 @app.route("/<path:path>")
-def catch_all():
+def catch_all(path):
     '''Catch all requests and render the SVG'''
     resp = Response(
         make_svg(
