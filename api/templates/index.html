@@ -52,12 +52,14 @@
         .cover {
             width: 120px;
             height: 120px;
-            {% if spin %}                    border-radius: 50%;
-            animation: spin 0ms -800ms linear infinite;
-            animation-duration: 10s;
+            {% if spin %}
+                border-radius: 50%;
+                animation: spin 0ms -800ms linear infinite;
+                animation-duration: 10s;
             {% else %}
-            border-radius: 10px;
+                border-radius: 10px;
             {% endif %}
+
             {% if theme == 'dark' %}
                 box-shadow: 0 0 10px 5px #1b2027;
             {% elif theme == 'aws' %}
@@ -115,7 +117,7 @@
             max-width: 260px;
             {% if theme == 'dark' %}
                 color: rgba(240, 248, 255, calc(2/3));
-            {% if theme == 'aws' %}
+            {% elif theme == 'aws' %}
                 color: rgba(233, 235, 237, calc(2/3));
             {% else %}
                 color: rgba(22, 27, 34, calc(2/3));
