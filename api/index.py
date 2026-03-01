@@ -102,8 +102,8 @@ def make_svg(spin, scan, theme, rainbow):
         scan_code = None
     return render_template('index.html', **{
         'bars': generate_bars(bar_count, rainbow),
-        'artist': item['artists'][0]['name'].replace('&', '&amp;'),
-        'song': item['name'].replace('&', '&amp;'),
+        'artist': item['artists'][0]['name'],
+        'song': item['name'],
         'image': image,
         'scan_code': scan_code if scan_code != '' else B64_PLACEHOLDER_SCAN_CODE,
         'theme': theme,
