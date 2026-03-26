@@ -84,16 +84,22 @@ def get_scan_code(spotify_uri):
 
 def make_svg(spin, scan, theme, rainbow):
     '''Render the HTML template with variables'''
-    if data := spotify_request('me/player/currently-playing'):
+    if data := spotify_request('me/player/currently-playing?additional_types=episode'):
         item = data['item']
     else:
         item = spotify_request(
             'me/player/recently-played?limit=3')['items'][0]['track']
 
-    if item['album']['images'] == []:
+    if item.get('type') == 'episode':
+        images = item.get('images') or item.get('show', {}).get('images', [])
+        artist = item.get('show', {}).get('name', 'Podcast')
+    else:
+        images = item.get('album', {}).get('images', [])
+        artist = item.get('artists', [{}])[0].get('name', 'Unknown Artist')
+    if not images:
         image = B64_PLACEHOLDER_IMAGE
     else:
-        image = load_image_base64(item['album']['images'][1]['url'])
+        image = load_image_base64(images[min(1, len(images) - 1)]['url'])
     if scan and scan != 'false' and scan != '0':
         bar_count = 10
         scan_code = get_scan_code(item['uri'])
@@ -102,7 +108,7 @@ def make_svg(spin, scan, theme, rainbow):
         scan_code = None
     return render_template('index.html', **{
         'bars': generate_bars(bar_count, rainbow),
-        'artist': item['artists'][0]['name'],
+        'artist': artist,
         'song': item['name'],
         'image': image,
         'scan_code': scan_code if scan_code != '' else B64_PLACEHOLDER_SCAN_CODE,
