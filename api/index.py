@@ -122,7 +122,7 @@ def catch_all(path):
     resp = Response(
         make_svg(
             request.args.get('spin'),
-            request.args.get('scan'),
+            request.args.get('scan', 'true'),
             request.args.get('theme'),
             request.args.get('rainbow'),
         ),
