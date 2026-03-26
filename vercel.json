@@ -1,9 +1,8 @@
 {
-  "redirects": [
+  "rewrites": [
     {
       "source": "/",
-      "destination": "/api?scan=true",
-      "permanent": false
+      "destination": "/api"
     }
   ]
 }
